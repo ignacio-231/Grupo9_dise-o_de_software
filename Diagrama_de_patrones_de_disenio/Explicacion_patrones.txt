@@ -1,0 +1,57 @@
+Patrón aplicado: Factory / Simple Factory.
+Tipo: Creacional.
+
+Problema que resuelve:
+El sistema necesita crear distintos tipos de usuarios según su rol: PersonaUsuaria, CoordinadorCentro y Vacunador. Cada uno tiene permisos y responsabilidades distintas dentro del proceso de vacunación.
+
+Alternativa descartada:
+Crear los usuarios directamente desde la interfaz o desde los controladores usando condicionales repetidos, por ejemplo: si el rol es persona usuaria, crear PersonaUsuaria; si es coordinador, crear CoordinadorCentro; si es vacunador, crear Vacunador.
+
+Ubicación respecto al dominio:
+El patrón se ubica en la creación de usuarios del sistema. La clase UsuarioFactory recibe el rol y los datos del usuario, y retorna una instancia concreta de Usuario.
+
+Pertinencia al flujo:
+Se usa al registrar o inicializar usuarios antes de ejecutar el proceso principal. Esto permite que después el sistema controle qué acciones puede realizar cada rol: la persona usuaria reserva citas, el coordinador administra centros y stock, y el vacunador registra vacunaciones.
+
+Ventaja de incorporación:
+Centraliza la creación de usuarios, reduce el acoplamiento entre la interfaz y las clases concretas, y facilita agregar nuevos roles sin modificar varias partes del sistema. Además, su aplicación es real porque la fábrica será usada por el código para crear los usuarios que participan en el flujo.
+
+--------------------------------------------------------------------
+
+Patrón aplicado: Facade.
+Tipo: Estructural.
+
+Problema que resuelve:
+La interfaz de línea de comando no debería conocer ni coordinar directamente todos los servicios internos del sistema. Si la interfaz llamara por separado a AuthService, CitaService, CentroService y VacunacionService, quedaría muy acoplada a la estructura interna del sistema.
+
+Alternativa descartada:
+Se descarta que la InterfazCLI invoque directamente a cada servicio interno. Esa alternativa haría que cualquier cambio en los servicios afecte también a la interfaz, dificultando la mantención del sistema.
+
+Ubicación respecto al dominio:
+La clase SistemaVacunacionFacade se ubica entre la InterfazCLI y la lógica de aplicación. Expone operaciones principales del proceso de vacunación, como iniciarSesion(), consultarDisponibilidad(), reservarCita(), registrarVacunacion() y consultarStock().
+
+Pertinencia al flujo:
+El flujo BPMN puede ejecutarse desde la InterfazCLI llamando a métodos simples de SistemaVacunacionFacade. La fachada coordina internamente los servicios necesarios para autenticar usuarios, consultar disponibilidad, reservar citas, registrar vacunaciones y consultar stock.
+
+Ventaja de incorporación:
+Reduce el acoplamiento entre la interfaz y los servicios internos, simplifica el uso del sistema desde la consola y mantiene separadas las responsabilidades de autenticación, citas, centros y vacunaciones. Su aplicación es real porque el código puede usar SistemaVacunacionFacade como punto único de entrada para ejecutar el proceso.
+
+---------------------------------------------------------------------
+
+Patrón aplicado: Strategy.
+Tipo: Comportamiento.
+
+Problema que resuelve:
+El sistema necesita consultar disponibilidad de citas antes de reservar una cita. Esta consulta puede hacerse con distintos criterios, por ejemplo por centro, por fecha o por campaña.
+
+Alternativa descartada:
+Se descarta implementar toda la lógica en un único método consultarDisponibilidad() con varios condicionales, como “si busca por centro”, “si busca por fecha” o “si busca por campaña”. Esa alternativa haría que CitaService concentre demasiada lógica y sea más difícil de mantener.
+
+Ubicación respecto al dominio:
+El patrón se ubica en la consulta de disponibilidad de citas. CitaService mantiene una referencia a EstrategiaBusquedaDisponibilidad y delega la búsqueda en una estrategia concreta, como BusquedaPorCentro, BusquedaPorFecha o BusquedaPorCampaña.
+
+Pertinencia al flujo:
+Este patrón se usa cuando la PersonaUsuaria consulta disponibilidad antes de reservar una cita. Según el criterio elegido, el sistema selecciona la estrategia correspondiente y muestra los horarios disponibles. Luego, con una opción disponible, se puede continuar con la reserva de la cita.
+
+Ventaja de incorporación:
+Permite cambiar la forma de búsqueda sin modificar CitaService, reduce los condicionales, mejora la cohesión y facilita agregar nuevos criterios de consulta en el futuro. Su aplicación es real porque la reserva de cita requiere consultar disponibilidad previamente.
