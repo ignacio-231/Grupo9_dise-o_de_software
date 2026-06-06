@@ -24,14 +24,14 @@ Vacunador:             vacunador@demo.cl / 1234
 
 ```text
 src/ejecutar.py                    Archivo principal.
-src/interfaz\\\_consola.py         Menú de texto.
-src/datos\\\_de\\\_prueba.py       Datos iniciales para probar.
+src/interfaz_consola.py         Menú de texto.
+src/datos_de_prueba.py       Datos iniciales para probar.
 src/seguridad.py                   Roles, permisos y sesión por token.
 src/modelos.py                     Clases del dominio.
-src/factory\\\_usuarios.py         Patrón creacional Factory.
-src/strategy\\\_busqueda.py        Patrón de comportamiento Strategy.
+src/factory_usuarios.py         Patrón creacional Factory.
+src/strategy_busqueda.py        Patrón de comportamiento Strategy.
 src/servicios.py                   Lógica de negocio.
-src/facade\\\_sistema.py           Patrón estructural Facade.
-src/demo\\\_completa.py            Flujo automático de extremo a extremo.
+src/facade_sistema.py           Patrón estructural Facade.
+src/demo_completa.py            Flujo automático de extremo a extremo.
 ```
 
