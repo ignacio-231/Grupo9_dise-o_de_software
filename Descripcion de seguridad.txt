@@ -1,0 +1,38 @@
+Identificación y autenticación
+
+Para acceder a funciones protegidas, el usuario debe comprobar su identidad ingresando su correo y contraseña. El sistema verifica estas credenciales contra la base de datos antes de permitir cualquier interacción.
+
+---------------------------------------------------------------
+
+Sesión por Token
+
+Una vez validado el usuario genera un identificador un token. Este token representa la sesión activa y el rol del usuario, y se envía en cada solicitud futura para confirmar su identidad.
+
+---------------------------------------------------------------
+
+Distinción de roles
+
+El acceso a las funciones del sistema está dividido en roles específicos:
+
+Persona Usuaria: Permisos para uso general (consultar disponibilidad y reservar citas).
+Coordinador de Centro: Permisos para tareas administrativas (registrar centros, cargar lotes y consultar stock).
+Vacunador: Permisos para la operación médica (consultar citas del día y registrar vacunaciones).
+
+---------------------------------------------------------------
+
+Control de Acceso
+
+Todas las operaciones internas están restringidas. Un componente validador actúa como filtro: antes de ejecutar cualquier acción, revisa qué rol está asociado al token de la sesión. Si el rol no cuenta con la autorización necesaria para esa operación particular, el sistema bloquea el acceso y devuelve un error.
+
+---------------------------------------------------------------
+
+Secuencia de Autenticación y Autorización
+
+El proceso paso a paso que sigue el sistema para procesar una solicitud es el siguiente :
+
+1. El cliente envía sus credenciales (correo y contraseña) para iniciar sesión.
+2. El sistema valida los datos y, si son correctos, devuelve un token temporal de sesión.
+3. El cliente solicita realizar una acción específica del sistema adjuntando su token.
+4. El sistema recibe la petición y verifica que el token exista en sus registros de sesiones activas.
+5. El sistema extrae el rol asociado a ese token y comprueba si tiene los permisos requeridos para la acción solicitada.
+6. Se ejecuta la operación si el permiso es válido, o se rechaza la solicitud de inmediato si el usuario no tiene los privilegios adecuados.
