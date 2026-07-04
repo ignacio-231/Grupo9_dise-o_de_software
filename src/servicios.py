@@ -28,9 +28,10 @@ class ServicioCitas:
     GRASP Creador: crea Cita.
     Strategy: delega la búsqueda de disponibilidad.
     """
-    def __init__(self, base_datos):
+    def __init__(self, base_datos, servicio_correo=None):
         self.base_datos = base_datos
         self.estrategia_busqueda = BusquedaPorCentro()
+        self.servicio_correo = servicio_correo
 
     def cambiar_estrategia_busqueda(self, estrategia):
         self.estrategia_busqueda = estrategia
@@ -43,9 +44,23 @@ class ServicioCitas:
             raise ValueError("El centro no existe.")
         if id_campania not in self.base_datos.campanias:
             raise ValueError("La campaña no existe.")
+        
         cita = Cita(self.base_datos.nuevo_id_cita(), id_persona, id_centro, id_campania, fecha_hora)
         cita.confirmar()
         self.base_datos.citas[cita.id_cita] = cita
+
+        # Llamada a la API de notificaciones
+        if self.servicio_correo:
+            usuario = self.base_datos.usuarios.get(id_persona)
+            centro = self.base_datos.centros.get(id_centro)
+            if usuario and centro:
+                self.servicio_correo.enviar_confirmacion_cita(
+                    correo_destino=usuario.correo,
+                    nombre_usuario=usuario.nombre,
+                    fecha_hora=fecha_hora,
+                    centro=centro.nombre
+                )
+
         return cita
 
     def consultar_citas_del_dia(self, fecha: str):

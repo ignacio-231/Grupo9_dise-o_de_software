@@ -1,6 +1,6 @@
 from base_datos_memoria import BaseDatosMemoria
 from datos_de_prueba import cargar_datos_de_prueba
-from fachada_sistema import SistemaVacunacionFacade
+from facade_sistema import SistemaVacunacionFacade
 from interfaz_consola import InterfazConsola
 
 def main():

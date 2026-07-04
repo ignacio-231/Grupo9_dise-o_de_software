@@ -10,7 +10,7 @@ def cargar_datos_de_prueba(base_datos):
     usuarios = [
         UsuarioFactory.crear_usuario(Rol.PERSONA_USUARIA, {
             "id_usuario": base_datos.nuevo_id_usuario(),
-            "correo": "persona@demo.cl",
+            "correo": "ignaciocontardo15@gmail.com",
             "password": "1234",
             "rut": "11.111.111-1",
             "nombre": "Ana Pérez",

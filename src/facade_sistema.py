@@ -1,6 +1,7 @@
 from seguridad import GestorSeguridad, Operacion
 from servicios import ServicioCentros, ServicioCitas, ServicioVacunaciones
 from strategy_busqueda import BusquedaPorCentro, BusquedaPorFecha, BusquedaPorCampania
+from servicio_correo import ServicioCorreoAPI
 
 class SistemaVacunacionFacade:
     """
@@ -15,6 +16,9 @@ class SistemaVacunacionFacade:
         self.centros = ServicioCentros(base_datos)
         self.citas = ServicioCitas(base_datos)
         self.vacunaciones = ServicioVacunaciones(base_datos)
+        api_key_notificaciones = "re_T7ngMwpF_PLYNGzNSrgwkNPfV1MNTHUGT" 
+        self.servicio_correo = ServicioCorreoAPI(api_key_notificaciones)
+        self.citas = ServicioCitas(base_datos, self.servicio_correo)
 
     def iniciar_sesion(self, correo: str, password: str):
         return self.seguridad.iniciar_sesion(correo, password)
