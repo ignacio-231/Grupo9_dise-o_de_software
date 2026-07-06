@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 from base_datos_memoria import BaseDatosMemoria
 from datos_de_prueba import cargar_datos_de_prueba
 from facade_sistema import SistemaVacunacionFacade
-from modelos import Cita
+from modelos import Cita, Vacunacion  # <-- CORRECCIÓN: Se agrega Vacunacion aquí
 
 app = Flask(__name__)
 app.secret_key = "vacunared_secret_key_provisional"
@@ -198,7 +198,6 @@ def cancelar_cita(id_cita):
         print(f"Error al cancelar o enviar correo: {e}")
         
     # --- REDIRECCIÓN INTELIGENTE ---
-    # Si quien canceló la cita es un funcionario, vuelve a su panel. Si no, al de ciudadano.
     if session.get('rol') == 'VACUNADOR':
         return redirect(url_for('vista_citas_funcionario'))
     return redirect(url_for('vista_mis_citas'))
@@ -275,7 +274,6 @@ def vista_citas_funcionario():
         return redirect(url_for('vista_login'))
     usuario = sistema.seguridad.obtener_usuario(session['token'])
     
-    # Buscamos todas las citas programadas para mostrarlas en la tabla
     citas_todas = []
     for c in base_datos.citas.values():
         if c.estado in ["PROGRAMADA", "CONFIRMADA"]:
@@ -283,7 +281,6 @@ def vista_citas_funcionario():
             campania = base_datos.campanias.get(c.id_campania)
             centro = base_datos.centros.get(c.id_centro)
             
-            # Formateamos la hora para que quede limpia ("09:00")
             partes_fecha = c.fecha_hora.split(" a las ")
             fecha_sola = partes_fecha[0] if len(partes_fecha) > 0 else c.fecha_hora
             hora_sola = partes_fecha[1].replace(" hrs", "") if len(partes_fecha) > 1 else ""
@@ -310,32 +307,40 @@ def asignar_cita_funcionario():
         return redirect(url_for('vista_login'))
     
     try:
-        # El Funcionario se agenda la cita a SÍ MISMO
-        id_paciente = session['id_usuario']
-        
         id_campania = int(request.form.get('campania'))
         id_centro = int(request.form.get('centro'))
         fecha = request.form.get('fecha')
         horario = request.form.get('horario')
         
-        # Validamos que el funcionario NO tenga ya una cita activa en esta campaña
+        id_paciente = session['id_usuario']
+        
         cita_existente = next((c for c in base_datos.citas.values() 
                                if c.id_persona == id_paciente 
                                and c.id_campania == id_campania 
                                and c.estado in ["PROGRAMADA", "CONFIRMADA"]), None)
         
         if cita_existente:
-            print("Bloqueado: Ya tienes una cita activa para esta campaña.")
+            flash("Ya tienes una cita activa para esta campaña.", "error")
             return redirect(url_for('vista_citas_funcionario'))
         
+        nueva_cita_id = max(base_datos.citas.keys()) + 1 if base_datos.citas else 1
         fecha_formateada = f"{fecha} a las {horario} hrs"
         
-        # Usamos el método original de tu sistema
-        sistema.reservar_cita(session['token'], id_centro, id_campania, fecha_formateada)
-        print(f"Éxito: Cita personal asignada al Funcionario {id_paciente}.")
+        nueva_cita = Cita(
+            id_cita=nueva_cita_id,
+            id_persona=id_paciente,
+            id_centro=id_centro,
+            id_campania=id_campania,
+            fecha_hora=fecha_formateada,
+            estado="PROGRAMADA"
+        )
+        
+        base_datos.citas[nueva_cita_id] = nueva_cita
+        flash("Cita agendada exitosamente.", "success")
         
     except Exception as e:
-        print(f"Error al asignar cita personal de funcionario: {e}")
+        print(f"Error al asignar: {e}")
+        flash("Ocurrió un error inesperado.", "error")
         
     return redirect(url_for('vista_citas_funcionario'))
 
@@ -343,15 +348,57 @@ def asignar_cita_funcionario():
 def vista_vacunaciones_funcionario():
     if 'token' not in session or session.get('rol') != 'VACUNADOR':
         return redirect(url_for('vista_login'))
-    usuario = sistema.seguridad.obtener_usuario(session['token'])
     
-    registros = [
-        {"persona": "Carlos Muñoz Riquelme", "campania": "Influenza Invierno 2026", "centro": "Hospital San Borja Arriarán", "fecha": "03/07/2026", "lote": "FL-2026-B12", "dosis": 1, "aplicada_por": "Ana Torres"},
-        {"persona": "María González López", "campania": "Influenza Invierno 2026", "centro": "Hospital San Borja Arriarán", "fecha": "20/06/2026", "lote": "FL-2026-B12", "dosis": 1, "aplicada_por": "Valentina Morales"},
-        {"persona": "Diego Fernández Castro", "campania": "COVID-19 Refuerzo Bivalente 2026", "centro": "CESFAM Carol Urzúa", "fecha": "15/05/2026", "lote": "PF-2026-A34", "dosis": 1, "aplicada_por": "Valentina Morales"},
-        {"persona": "Carlos Muñoz Riquelme", "campania": "Hepatitis B — Funcionarios de Salud", "centro": "Hospital San Borja Arriarán", "fecha": "10/02/2026", "lote": "EN-2026-A01", "dosis": 1, "aplicada_por": "Ana Torres"}
-    ]
-    return render_template('funcionario_vacunaciones.html', usuario=usuario, registros=registros)
+    usuario = sistema.seguridad.obtener_usuario(session['token'])
+    registros = []
+    
+    for v in base_datos.vacunaciones.values():
+        cita = base_datos.citas.get(v.id_cita)
+        if cita:
+            persona = base_datos.usuarios.get(cita.id_persona)
+            registros.append({
+                "persona": persona.nombre if persona else "Desconocido",
+                "campania": base_datos.campanias.get(cita.id_campania).nombre,
+                "centro": base_datos.centros.get(cita.id_centro).nombre,
+                "fecha": cita.fecha_hora.split(" ")[0],
+                "lote": v.id_lote,
+                "dosis": 1,
+                "aplicada_por": usuario.nombre
+            })
+            
+    citas_pendientes = [c for c in base_datos.citas.values() if c.estado == "PROGRAMADA"]
+    
+    return render_template('funcionario_vacunaciones.html', 
+                           usuario=usuario, 
+                           registros=registros, 
+                           citas_pendientes=citas_pendientes)
+
+@app.route('/funcionario/registrar-vacunacion', methods=['POST'])
+def registrar_vacunacion_func():
+    if 'token' not in session or session.get('rol') != 'VACUNADOR':
+        return redirect(url_for('vista_login'))
+    
+    try:
+        id_cita = int(request.form.get('id_cita'))
+        lote = request.form.get('lote')
+        
+        if id_cita in base_datos.citas:
+            cita = base_datos.citas[id_cita]
+            cita.estado = "REALIZADA"
+            
+            nuevo_id_vac = max(base_datos.vacunaciones.keys()) + 1 if base_datos.vacunaciones else 1
+            
+            base_datos.vacunaciones[nuevo_id_vac] = Vacunacion(
+                id_vacunacion=nuevo_id_vac,
+                id_cita=id_cita,
+                id_lote=lote
+            )
+            print(f"Éxito: Vacunación {nuevo_id_vac} registrada para la cita {id_cita}.")
+            
+    except Exception as e:
+        print(f"Error al registrar vacunación: {e}")
+        
+    return redirect(url_for('vista_vacunaciones_funcionario'))
 
 @app.route('/funcionario/perfil')
 def vista_perfil_funcionario():
