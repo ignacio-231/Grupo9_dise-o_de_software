@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VacunaRed - Iniciar Sesión</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: '#0D9488', // Color Teal / Verde azulado
+                        bgLight: '#F3F4F6'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-bgLight font-sans flex flex-col items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-md space-y-6">
+        
+        <div class="flex items-center justify-center space-x-2">
+            <div class="bg-brand text-white p-2 rounded-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                </svg>
+            </div>
+            <span class="text-xl font-bold tracking-wider text-gray-900 uppercase">VacunaRed</span>
+        </div>
+
+        <div class="text-left pl-1">
+            <h1 class="text-2xl font-bold text-gray-900">Iniciar sesión</h1>
+            <p class="text-sm text-gray-500 mt-1">Ingresa tus credenciales para acceder al sistema</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form action="/login" method="POST" class="space-y-5 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+            
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-bold tracking-wider text-gray-500 uppercase block pl-1">Correo Electrónico</label>
+                <input type="email" name="correo" required placeholder="ejemplo@correo.cl"
+                       class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand focus:bg-white transition-all">
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-bold tracking-wider text-gray-500 uppercase block pl-1">Contraseña</label>
+                <input type="password" name="password" required placeholder="••••••••"
+                       class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand focus:bg-white transition-all">
+            </div>
+
+            <button type="submit" 
+                    class="w-full bg-brand hover:bg-teal-800 text-white font-medium py-3 rounded-lg transition-colors duration-200 shadow-sm mt-2">
+                Ingresar
+            </button>
+        </form>
+
+        <p class="text-center text-xs text-gray-400">&copy; 2026 VacunaRed. Todos los derechos reservados.</p>
+    </div>
+
+</body>
+</html>

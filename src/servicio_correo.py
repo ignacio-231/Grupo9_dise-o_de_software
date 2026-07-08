@@ -45,3 +45,36 @@ class ServicioCorreoAPI:
         
         except requests.exceptions.RequestException as e:
             print(f"\n-> [Error API] Falló la comunicación con el servicio de notificaciones: {e}")
+    def enviar_cancelacion_cita(self, correo_destino: str, nombre_usuario: str, fecha_hora: str, centro: str):
+        if not self.api_key:
+            print("-> [Aviso] API Key no configurada. Saltando notificación.")
+            return
+
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+
+        # Estructura del correo de cancelación
+        payload = {
+            "from": "onboarding@resend.dev",
+            "to": correo_destino,
+            "subject": "Cancelación de Reserva - VacunaRed",
+            "html": (
+                f"<p>Hola <strong>{nombre_usuario}</strong>,</p>"
+                f"<p>Te confirmamos que tu cita ha sido <strong>cancelada</strong> exitosamente en nuestro sistema.</p>"
+                f"<ul>"
+                f"<li><strong>Centro:</strong> {centro}</li>"
+                f"<li><strong>Fecha y Hora cancelada:</strong> {fecha_hora}</li>"
+                f"</ul>"
+                f"<p>Puedes volver a agendar una nueva cita cuando lo desees desde tu panel principal en VacunaRed.</p>"
+            )
+        }
+
+        try:
+            response = requests.post(self.url, json=payload, headers=headers)
+            response.raise_for_status() 
+            print(f"\n-> [Éxito API] Notificación de cancelación enviada a {correo_destino} (Status: {response.status_code})")
+        
+        except requests.exceptions.RequestException as e:
+            print(f"\n-> [Error API] Falló la comunicación con el servicio de notificaciones: {e}")
