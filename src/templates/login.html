@@ -10,7 +10,7 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: '#0D9488', // Color Teal / Verde azulado de tus capturas
+                        brand: '#0D9488', // Color Teal / Verde azulado
                         bgLight: '#F3F4F6'
                     }
                 }
@@ -33,7 +33,7 @@
 
         <div class="text-left pl-1">
             <h1 class="text-2xl font-bold text-gray-900">Iniciar sesión</h1>
-            <p class="text-sm text-gray-500 mt-1">Seleccione una cuenta de demostración</p>
+            <p class="text-sm text-gray-500 mt-1">Ingresa tus credenciales para acceder al sistema</p>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -46,75 +46,28 @@
             {% endif %}
         {% endwith %}
 
-        <form action="/login" method="POST" class="space-y-5">
+        <form action="/login" method="POST" class="space-y-5 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
             
-            <input type="hidden" name="correo" id="input-correo" value="">
-
-            <div class="space-y-3" id="contenedor-usuarios">
-                {% for usuario in usuarios %}
-                <div onclick="seleccionarUsuario('{{ usuario.correo }}', this)" 
-                     class="card-usuario flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all duration-200">
-                    
-                    <div class="flex items-center space-x-3">
-                        <div class="bg-slate-200 text-slate-700 font-bold h-10 w-10 rounded-full flex items-center justify-center text-sm uppercase">
-                            {{ usuario.nombre[:2] }}
-                        </div>
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-900">{{ usuario.nombre }}</h3>
-                            
-                            {% if usuario.rol == 'PERSONA_USUARIA' %}
-                                <span class="inline-block mt-0.5 px-2 py-0.5 bg-blue-50 text-blue-600 text-[11px] font-medium rounded-md border border-blue-100">Ciudadano</span>
-                            {% elif usuario.rol == 'COORDINADOR_CENTRO' %}
-                                <span class="inline-block mt-0.5 px-2 py-0.5 bg-purple-50 text-purple-600 text-[11px] font-medium rounded-md border border-purple-100">Coordinador</span>
-                            {% elif usuario.rol == 'VACUNADOR' %}
-                                <span class="inline-block mt-0.5 px-2 py-0.5 bg-amber-50 text-amber-600 text-[11px] font-medium rounded-md border border-amber-100">Funcionario</span>
-                            {% else %}
-                                <span class="inline-block mt-0.5 px-2 py-0.5 bg-gray-50 text-gray-600 text-[11px] font-medium rounded-md border border-gray-100">{{ usuario.rol }}</span>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div class="icon-check text-brand hidden">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                    </div>
-                </div>
-                {% endfor %}
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-bold tracking-wider text-gray-500 uppercase block pl-1">Correo Electrónico</label>
+                <input type="email" name="correo" required placeholder="ejemplo@correo.cl"
+                       class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand focus:bg-white transition-all">
             </div>
 
             <div class="space-y-1.5">
                 <label class="text-[11px] font-bold tracking-wider text-gray-500 uppercase block pl-1">Contraseña</label>
                 <input type="password" name="password" required placeholder="••••••••"
-                       class="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all">
+                       class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand focus:bg-white transition-all">
             </div>
 
             <button type="submit" 
-                    class="w-full bg-brand hover:bg-teal-800 text-white font-medium py-3 rounded-lg transition-colors duration-200 shadow-sm">
-                Ingresar al sistema
+                    class="w-full bg-brand hover:bg-teal-800 text-white font-medium py-3 rounded-lg transition-colors duration-200 shadow-sm mt-2">
+                Ingresar
             </button>
         </form>
 
-        <p class="text-center text-xs text-gray-400">Entorno de demostración · datos simulados</p>
+        <p class="text-center text-xs text-gray-400">&copy; 2026 VacunaRed. Todos los derechos reservados.</p>
     </div>
 
-    <script>
-        function seleccionarUsuario(correo, elementoCard) {
-            // Asignar el correo seleccionado al campo oculto del formulario
-            document.getElementById('input-correo').value = correo;
-
-            // Limpiar estilos activos previos de todas las tarjetas
-            document.querySelectorAll('.card-usuario').forEach(card => {
-                card.classList.remove('border-brand', 'bg-teal-50/20');
-                card.classList.add('border-gray-200', 'bg-white');
-                card.querySelector('.icon-check').classList.add('hidden');
-            });
-
-            // Aplicar estilos activos a la tarjeta seleccionada actual
-            elementoCard.classList.remove('border-gray-200', 'bg-white');
-            elementoCard.classList.add('border-brand', 'bg-teal-50/20');
-            elementoCard.querySelector('.icon-check').classList.remove('hidden');
-        }
-    </script>
 </body>
 </html>
